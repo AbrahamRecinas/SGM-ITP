@@ -91,4 +91,4 @@ class Mantenimiento(models.Model):
     def __str__(self):
         return f"{self.tipo} - {self.equipo.numero_serie}"
 
-#HOLA ABRAHAM SOY ERICK, YA VINE A SOLUIONAR EL PROGRAMA, YA NO HAY DE QUE PREOCUPARSE PUES ESTOY AQUI
+#HOLA ABRAHAM SOY ERICK, YA VINE A SOLUIONAR EL PROGRAMA, YA NO HAY DE QUE PREOCUPARSE PUES ESTOY AQUI.
