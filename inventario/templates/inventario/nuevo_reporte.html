@@ -1,0 +1,38 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Nuevo Reporte - SGM-ITP{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-tecnm text-white pt-3 pb-2">
+                <h4 class="fw-bold">📝 Levantar Nuevo Reporte de Falla</h4>
+            </div>
+            <div class="card-body p-4">
+                
+                <form method="POST">
+                    
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-tecnm">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="text-danger small mt-1">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{% url 'lista_reportes' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn bg-tecnm text-white">💾 Guardar Reporte</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
