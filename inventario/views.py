@@ -1,9 +1,15 @@
 from django.shortcuts import render
-from .models import Equipo
+from .models import Equipo, ReporteFalla, Mantenimiento
 
 def lista_equipos(request):
-    # Vamos a la base de datos y traemos TODOS los equipos
     equipos = Equipo.objects.all()
-    
-    # Se los enviamos a un archivo HTML (que crearemos en el siguiente paso)
     return render(request, 'inventario/lista_equipos.html', {'equipos': equipos})
+# --- NUEVA VISTA ---
+def lista_reportes(request):
+    # order_by('-fecha_reporte') hace que los reportes más nuevos salgan hasta arriba
+    reportes = ReporteFalla.objects.all().order_by('-fecha_reporte')
+    return render(request, 'inventario/lista_reportes.html', {'reportes': reportes})
+def lista_mantenimientos(request):
+    # Traemos los mantenimientos ordenados del más reciente al más antiguo
+    mantenimientos = Mantenimiento.objects.all().order_by('-fecha')
+    return render(request, 'inventario/lista_mantenimientos.html', {'mantenimientos': mantenimientos})
