@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from inventario import views  # <-- Importamos tus vistas
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('equipos/', views.lista_equipos, name='lista_equipos'), # <-- Tu nueva página
 ]
