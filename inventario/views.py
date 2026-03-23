@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from .models import Equipo, ReporteFalla, Mantenimiento
 from .forms import ReporteFallaForm
@@ -14,6 +15,7 @@ def lista_mantenimientos(request):
     # Traemos los mantenimientos ordenados del más reciente al más antiguo
     mantenimientos = Mantenimiento.objects.all().order_by('-fecha')
     return render(request, 'inventario/lista_mantenimientos.html', {'mantenimientos': mantenimientos})
+@login_required
 def nuevo_reporte(request):
     # Si el usuario le dio clic al botón de "Guardar" (envió datos)
     if request.method == 'POST':

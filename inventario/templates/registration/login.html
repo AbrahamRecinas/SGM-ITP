@@ -1,0 +1,52 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Iniciar Sesión - SGM-ITP{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5 mt-5">
+        <div class="card shadow border-0">
+            <div class="card-header bg-tecnm text-white text-center py-3">
+                <h4 class="mb-0 fw-bold">🔒 Acceso al Sistema</h4>
+            </div>
+            <div class="card-body p-4">
+
+                {% if form.errors %}
+                    <div class="alert alert-danger text-center shadow-sm">
+                        Usuario o contraseña incorrectos. Por favor, intenta de nuevo.
+                    </div>
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-tecnm">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                    {% endfor %}
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn bg-tecnm text-white fw-bold fs-5">Entrar</button>
+                    </div>
+                    
+                    <input type="hidden" name="next" value="{{ next }}">
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-body input {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 1rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+    }
+</style>
+{% endblock %}
