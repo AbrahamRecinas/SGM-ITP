@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | SGM-ITP{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <i class="fas fa-university"></i> SGM-ITP | Centro de Cómputo
+    </a>
+</h1>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<style>
+    /* 1. Barra superior con el azul TecNM oficial */
+    #header {
+        background: #1B396A !important;
+        padding: 15px 40px;
+        height: auto;
+        border-bottom: 4px solid #f3b01a; /* Detalle en dorado/amarillo */
+    }
+
+    #site-name a {
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    /* 2. Barra de navegación (migas de pan) */
+    div.breadcrumbs {
+        background: #f8f9fa !important;
+        color: #1B396A !important;
+        border-bottom: 1px solid #dee2e6;
+        padding: 10px 40px;
+    }
+
+    div.breadcrumbs a { color: #1B396A !important; font-weight: 600; }
+
+    /* 3. Estilo de las tarjetas (módulos) */
+    .module {
+        border-radius: 12px !important;
+        overflow: hidden;
+        border: none !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+        margin-bottom: 30px !important;
+    }
+
+    .module h2, .module caption {
+        background: #1B396A !important;
+        font-weight: 700;
+        padding: 12px 15px !important;
+    }
+
+    /* 4. Botones modernos */
+    .button, input[type=submit], input[type=button], .submit-row input {
+        background: #1B396A !important;
+        border-radius: 50px !important;
+        padding: 10px 25px !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        font-size: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .button:hover { background: #152b50 !important; transform: translateY(-1px); }
+
+    /* 5. Tabla de datos */
+    #changelist table thead th {
+        background: #f1f3f5 !important;
+        color: #495057 !important;
+        font-weight: 700;
+    }
+</style>
+{% endblock %}

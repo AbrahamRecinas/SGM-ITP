@@ -5,34 +5,99 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-tecnm text-white pt-3 pb-2">
-                <h4 class="fw-bold">📝 Levantar Nuevo Reporte de Falla</h4>
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-tecnm text-white pt-4 pb-3">
+                <div class="d-flex align-items-center justify-content-center">
+                    <i class="fa-solid fa-pen-to-square fa-2x me-3"></i>
+                    <div>
+                        <h4 class="fw-bold mb-0">Levantar Nuevo Reporte</h4>
+                        <p class="small mb-0 text-white-50">Complete los detalles de la falla detectada</p>
+                    </div>
+                </div>
             </div>
-            <div class="card-body p-4">
-                
+            
+            <div class="card-body p-4 p-lg-5">
                 <form method="POST">
-                    
                     {% csrf_token %}
                     
                     {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-tecnm">{{ field.label }}</label>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-tecnm small mb-2">
+                                {% if field.name == 'equipo' %}
+                                    <i class="fa-solid fa-desktop me-1"></i> Seleccionar Equipo
+                                {% elif field.name == 'solicitante' %}
+                                    <i class="fa-solid fa-user-pen me-1"></i> Nombre del Solicitante
+                                {% elif field.name == 'descripcion_falla' %}
+                                    <i class="fa-solid fa-comment-dots me-1"></i> Descripción de la Falla
+                                {% else %}
+                                    {{ field.label }}
+                                {% endif %}
+                            </label>
+                            
                             {{ field }}
+                            
                             {% if field.errors %}
-                                <div class="text-danger small mt-1">{{ field.errors }}</div>
+                                <div class="text-danger small mt-2 animate__animated animate__fadeIn">
+                                    <i class="fa-solid fa-circle-exclamation me-1"></i> {{ field.errors|striptags }}
+                                </div>
+                            {% endif %}
+                            
+                            {% if field.help_text %}
+                                <div class="form-text small text-muted">{{ field.help_text }}</div>
                             {% endif %}
                         </div>
                     {% endfor %}
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                        <a href="{% url 'lista_reportes' %}" class="btn btn-outline-secondary">Cancelar</a>
-                        <button type="submit" class="btn bg-tecnm text-white">💾 Guardar Reporte</button>
+                    <div class="d-grid gap-3 d-md-flex justify-content-md-end mt-5">
+                        <a href="{% url 'lista_reportes' %}" class="btn btn-light border rounded-pill px-4 fw-bold">
+                            <i class="fa-solid fa-xmark me-1"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn bg-tecnm text-white rounded-pill px-5 fw-bold shadow">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Guardar Reporte
+                        </button>
                     </div>
                 </form>
-
             </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <p class="text-muted small">
+                <i class="fa-solid fa-circle-info me-1"></i> 
+                Este reporte será enviado automáticamente al equipo de soporte técnico.
+            </p>
         </div>
     </div>
 </div>
+
+<style>
+    /* Estilo para los campos de entrada de Django */
+    .card-body select, 
+    .card-body input, 
+    .card-body textarea {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1.2rem;
+        font-size: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 12px; /* Bordes redondeados modernos */
+        background-color: #f8f9fa;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .card-body select:focus, 
+    .card-body input:focus, 
+    .card-body textarea:focus {
+        background-color: #fff;
+        border-color: #1B396A;
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(27, 57, 106, 0.15);
+        transform: translateY(-1px);
+    }
+
+    /* Ajuste especial para el área de texto */
+    .card-body textarea {
+        height: 120px;
+        resize: none;
+    }
+</style>
 {% endblock %}
