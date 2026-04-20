@@ -11,7 +11,7 @@ urlpatterns = [
     # --- LA LÍNEA MÁGICA DE SEGURIDAD ---
     # Esto enciende automáticamente las rutas de login, logout, cambiar contraseña, etc.
     path('cuentas/', include('django.contrib.auth.urls')), 
-    
+    path('equipos/<int:equipo_id>/', views.detalle_equipo, name='detalle_equipo'),
     path('equipos/', views.lista_equipos, name='lista_equipos'),
     path('reportes/', views.lista_reportes, name='lista_reportes'),
     path('reportes/nuevo/', views.nuevo_reporte, name='nuevo_reporte'),

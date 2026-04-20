@@ -50,12 +50,11 @@
                             {% endif %}
                         </td>
                         <td class="pe-4 text-center">
-                            <a href="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=SGM-ITP | Equipo: {{ equipo.marca }} {{ equipo.modelo }} | Serie: {{ equipo.numero_serie }} | Estado: {{ equipo.estado }}" 
-                               target="_blank" 
-                               class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-sm"
-                               title="Generar y ver Código QR">
-                                <i class="fa-solid fa-qrcode me-1"></i> Ver QR
-                            </a>
+                            <a href="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=http://127.0.0.1:8000{% url 'detalle_equipo' equipo.id %}" 
+   target="_blank" 
+   class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-sm">
+    <i class="fa-solid fa-qrcode me-1"></i> Ver QR
+</a>
                         </td>
                     </tr>
                     {% empty %}

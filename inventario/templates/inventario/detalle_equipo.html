@@ -1,0 +1,62 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Detalle de Equipo - SGM-ITP{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-tecnm text-white py-3">
+                <h4 class="mb-0 fw-bold"><i class="fa-solid fa-laptop me-2"></i>Hoja de Vida del Equipo</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5 class="text-tecnm fw-bold border-bottom pb-2">Información Técnica</h5>
+                        <p><strong>Marca:</strong> {{ equipo.marca }}</p>
+                        <p><strong>Modelo:</strong> {{ equipo.modelo }}</p>
+                        <p><strong>Serie:</strong> <span class="font-monospace">{{ equipo.numero_serie }}</span></p>
+                        <p><strong>Estado:</strong> 
+                            <span class="badge rounded-pill {% if equipo.estado == 'Activo' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                {{ equipo.estado }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-center border-start">
+                        <p class="text-muted small">Identificador del Sistema</p>
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ request.build_absolute_uri }}" class="img-thumbnail shadow-sm">
+                        <p class="mt-2 fw-bold text-tecnm">ID: {{ equipo.id }}</p>
+                    </div>
+                </div>
+
+                <h5 class="text-tecnm fw-bold border-bottom pb-2">Historial Reciente de Fallas</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm small">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Falla</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in reportes %}
+                            <tr>
+                                <td>{{ r.fecha_reporte|date:"d/m/Y" }}</td>
+                                <td>{{ r.descripcion_falla|truncatechars:40 }}</td>
+                                <td>{{ r.estado }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" class="text-center text-muted">Sin reportes previos</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-grid mt-4">
+                    <a href="{% url 'lista_equipos' %}" class="btn btn-outline-secondary rounded-pill">Volver al Inventario</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
