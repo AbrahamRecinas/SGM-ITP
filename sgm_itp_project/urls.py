@@ -17,4 +17,5 @@ urlpatterns = [
     path('reportes/nuevo/', views.nuevo_reporte, name='nuevo_reporte'),
     path('mantenimientos/', views.lista_mantenimientos, name='lista_mantenimientos'),
     path('reportes/<int:reporte_id>/atender/', views.atender_reporte, name='atender_reporte'),
+    path('mantenimientos/nuevo/', views.registrar_mantenimiento, name='registrar_mantenimiento'),
 ]

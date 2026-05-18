@@ -1,8 +1,7 @@
 from django.contrib.auth.decorators import login_required, permission_required # <-- Agregamos permission_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Equipo, ReporteFalla, Mantenimiento
-from .forms import ReporteFallaForm, AtenderReporteForm # <-- Agregamos AtenderReporteForm
-
+from .forms import ReporteFallaForm, AtenderReporteForm, MantenimientoForm
 def lista_equipos(request):
     equipos = Equipo.objects.all()
     return render(request, 'inventario/lista_equipos.html', {'equipos': equipos})
@@ -60,3 +59,23 @@ def atender_reporte(request, reporte_id):
         form = AtenderReporteForm(instance=reporte)
         
     return render(request, 'inventario/atender_reporte.html', {'form': form, 'reporte': reporte})
+
+# --- VISTA PARA REGISTRAR UN MANTENIMIENTO ---
+@login_required
+@permission_required('inventario.add_mantenimiento', raise_exception=True)
+def registrar_mantenimiento(request):
+    if request.method == 'POST':
+        form = MantenimientoForm(request.POST)
+        if form.is_valid():
+            # Magia de Django: Pausamos el guardado (commit=False)
+            mantenimiento = form.save(commit=False)
+            # Le inyectamos a la fuerza el estado Terminado
+            mantenimiento.estado_mantenimiento = 'Terminado'
+            # Ahora sí, guardamos en la base de datos
+            mantenimiento.save()
+            
+            return redirect('lista_mantenimientos')
+    else:
+        form = MantenimientoForm()
+        
+    return render(request, 'inventario/registrar_mantenimiento.html', {'form': form})

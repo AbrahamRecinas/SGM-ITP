@@ -41,16 +41,21 @@
                             {% else %}
                                 <span class="badge bg-success rounded-pill px-3 py-2"><i class="fa-solid fa-check me-1"></i> Finalizado</span>
                             {% endif %}
-                        </td>
-                        
+                        </td>                        
                         <td>
                             {% if perms.inventario.change_reportefalla %}
-                                <a href="{% url 'atender_reporte' reporte.id %}" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill shadow-sm px-3">
-                                    <i class="fa-solid fa-wrench me-1"></i> Atender
-                                </a>
+        
+                                {% if reporte.estado != 'Finalizado' %}
+                                    <a href="{% url 'atender_reporte' reporte.id %}" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill shadow-sm px-3">
+                                        <i class="fa-solid fa-wrench me-1"></i> Atender
+                                    </a>
                             {% else %}
-                                <span class="text-muted small"><i class="fa-solid fa-eye me-1"></i> Solo lectura</span>
+                                    <span class="text-muted small"><i class="fa-solid fa-lock me-1"></i> Cerrado</span>
                             {% endif %}
+        
+                        {% else %}
+                            <span class="text-muted small"><i class="fa-solid fa-eye me-1"></i> Solo lectura</span>
+                        {% endif %}
                         </td>
                         </tr>
                     {% empty %}
