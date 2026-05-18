@@ -14,3 +14,11 @@ class ReporteFallaForm(forms.ModelForm):
             'solicitante': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Juan Pérez - Edificio A'}),
             'descripcion_falla': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Describe detalladamente el problema...'}),
         }
+        
+class AtenderReporteForm(forms.ModelForm):
+    class Meta:
+        model = ReporteFalla
+        fields = ['estado'] # Solo dejamos que editen el estado
+        widgets = {
+            'estado': forms.Select(attrs={'class': 'form-select'}),
+        }

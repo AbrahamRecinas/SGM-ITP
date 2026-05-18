@@ -16,4 +16,5 @@ urlpatterns = [
     path('reportes/', views.lista_reportes, name='lista_reportes'),
     path('reportes/nuevo/', views.nuevo_reporte, name='nuevo_reporte'),
     path('mantenimientos/', views.lista_mantenimientos, name='lista_mantenimientos'),
+    path('reportes/<int:reporte_id>/atender/', views.atender_reporte, name='atender_reporte'),
 ]

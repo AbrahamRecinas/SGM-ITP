@@ -1,7 +1,7 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404 # <--- Importante: agregamos get_object_or_404
+from django.contrib.auth.decorators import login_required, permission_required # <-- Agregamos permission_required
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Equipo, ReporteFalla, Mantenimiento
-from .forms import ReporteFallaForm
+from .forms import ReporteFallaForm, AtenderReporteForm # <-- Agregamos AtenderReporteForm
 
 def lista_equipos(request):
     equipos = Equipo.objects.all()
@@ -42,3 +42,21 @@ def detalle_equipo(request, equipo_id):
         'equipo': equipo,
         'reportes': reportes
     })
+
+# --- NUEVA VISTA PARA ATENDER REPORTES (SOLO TÉCNICOS) ---
+@login_required
+@permission_required('inventario.change_reportefalla', raise_exception=True)
+def atender_reporte(request, reporte_id):
+    # Buscamos el reporte exacto por su ID
+    reporte = get_object_or_404(ReporteFalla, id=reporte_id)
+    
+    if request.method == 'POST':
+        form = AtenderReporteForm(request.POST, instance=reporte)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_reportes')
+    else:
+        # Si apenas entra a la página, le mostramos el formulario pre-llenado con el estado actual
+        form = AtenderReporteForm(instance=reporte)
+        
+    return render(request, 'inventario/atender_reporte.html', {'form': form, 'reporte': reporte})

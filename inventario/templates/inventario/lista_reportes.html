@@ -23,9 +23,10 @@
                         <th>Solicitante</th>
                         <th>Falla Reportada</th>
                         <th class="pe-4">Estado</th>
+                        <th>ACCIONES</th>
                     </tr>
                 </thead>
-                <tbody>
+<tbody>
                     {% for reporte in reportes %}
                     <tr>
                         <td class="text-muted ps-4 small"><i class="fa-regular fa-clock me-1"></i> {{ reporte.fecha_reporte|date:"d M Y, H:i" }}</td>
@@ -41,10 +42,20 @@
                                 <span class="badge bg-success rounded-pill px-3 py-2"><i class="fa-solid fa-check me-1"></i> Finalizado</span>
                             {% endif %}
                         </td>
-                    </tr>
+                        
+                        <td>
+                            {% if perms.inventario.change_reportefalla %}
+                                <a href="{% url 'atender_reporte' reporte.id %}" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill shadow-sm px-3">
+                                    <i class="fa-solid fa-wrench me-1"></i> Atender
+                                </a>
+                            {% else %}
+                                <span class="text-muted small"><i class="fa-solid fa-eye me-1"></i> Solo lectura</span>
+                            {% endif %}
+                        </td>
+                        </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-5">
+                        <td colspan="6" class="text-center text-muted py-5">
                             <i class="fa-solid fa-inbox fa-3x text-light mb-3"></i><br>
                             No hay reportes de falla registrados.<br>¡Todo funciona perfecto!
                         </td>
