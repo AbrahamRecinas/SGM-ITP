@@ -18,4 +18,6 @@ urlpatterns = [
     path('mantenimientos/', views.lista_mantenimientos, name='lista_mantenimientos'),
     path('reportes/<int:reporte_id>/atender/', views.atender_reporte, name='atender_reporte'),
     path('mantenimientos/nuevo/', views.registrar_mantenimiento, name='registrar_mantenimiento'),
+    path('equipos/nuevo/', views.nuevo_equipo, name='nuevo_equipo'),
+    path('equipos/<int:equipo_id>/editar/', views.editar_equipo, name='editar_equipo'),
 ]

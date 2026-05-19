@@ -1,0 +1,41 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Editar Equipo - SGM-ITP{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-warning text-dark pt-3 pb-2">
+                <h4 class="fw-bold"><i class="fa-solid fa-pen me-2"></i> Modificar Equipo: {{ equipo.numero_serie }}</h4>
+            </div>
+            <div class="card-body p-4">
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        {% for field in form %}
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold text-tecnm small">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 pt-3 border-top">
+                        <a href="{% url 'lista_equipos' %}" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-warning fw-bold rounded-pill shadow-sm px-4 text-dark">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

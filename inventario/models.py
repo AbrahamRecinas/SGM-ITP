@@ -13,16 +13,28 @@ class Equipo(models.Model):
         ('Mantenimiento', 'En Mantenimiento'),
         ('Baja', 'Dado de Baja'),
     ]
-
-    # Conectamos el equipo a un edificio (null=True evita errores si ya tenías equipos guardados)
-    edificio = models.ForeignKey(Edificio, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Ubicación (Edificio)")
     
+    SO_CHOICES = [
+        ('Windows 10', 'Windows 10'),
+        ('Windows 11', 'Windows 11'),
+        ('Linux', 'Linux / Ubuntu'),
+        ('MacOS', 'MacOS / Apple'),
+        ('Otro', 'Otro OS'),
+    ]
+
+    # Ubicación e Identificación
+    edificio = models.ForeignKey(Edificio, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Ubicación (Edificio)")
     numero_serie = models.CharField(max_length=50, unique=True, verbose_name="Número de Serie")
     marca = models.CharField(max_length=50)
     modelo = models.CharField(max_length=50)
+    
+    # Software y Hardware Básico
+    sistema_operativo = models.CharField(max_length=20, choices=SO_CHOICES, default='Windows 10', verbose_name="Sistema Operativo")
     procesador = models.CharField(max_length=50)
     ram = models.CharField(max_length=20, verbose_name="Memoria RAM (GB)")
-    disco_duro = models.CharField(max_length=50, verbose_name="Almacenamiento (Disco Duro)", default="No especificado")
+    disco_duro = models.CharField(max_length=50, verbose_name="Almacenamiento", default="No especificado")
+    
+    # Control
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='Activo')
     fecha_registro = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Registro")
 

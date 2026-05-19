@@ -1,11 +1,36 @@
 from django.contrib.auth.decorators import login_required, permission_required # <-- Agregamos permission_required
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Equipo, ReporteFalla, Mantenimiento
-from .forms import ReporteFallaForm, AtenderReporteForm, MantenimientoForm
-def lista_equipos(request):
-    equipos = Equipo.objects.all()
-    return render(request, 'inventario/lista_equipos.html', {'equipos': equipos})
+from django.db.models import Q
+from .models import Equipo, ReporteFalla, Mantenimiento, Edificio
+from .forms import ReporteFallaForm, AtenderReporteForm, MantenimientoForm, EquipoForm
 
+def lista_equipos(request):
+    query = request.GET.get('q')
+    edificio_id = request.GET.get('edificio') # Capturamos si seleccionaron un edificio
+    
+    equipos = Equipo.objects.all()
+    
+    # Filtro por barra de búsqueda
+    if query:
+        equipos = equipos.filter(
+            Q(numero_serie__icontains=query) | 
+            Q(marca__icontains=query) | 
+            Q(modelo__icontains=query)
+        )
+    
+    # Filtro por edificio
+    if edificio_id:
+        equipos = equipos.filter(edificio_id=edificio_id)
+        
+    # Traemos todos los edificios para el menú desplegable de la interfaz
+    edificios = Edificio.objects.all()
+    
+    return render(request, 'inventario/lista_equipos.html', {
+        'equipos': equipos, 
+        'query': query,
+        'edificios': edificios,
+        'edificio_seleccionado': edificio_id
+    })
 def lista_reportes(request):
     # order_by('-fecha_reporte') hace que los reportes más nuevos salgan hasta arriba
     reportes = ReporteFalla.objects.all().order_by('-fecha_reporte')
@@ -79,3 +104,31 @@ def registrar_mantenimiento(request):
         form = MantenimientoForm()
         
     return render(request, 'inventario/registrar_mantenimiento.html', {'form': form})
+
+@login_required
+@permission_required('inventario.add_equipo', raise_exception=True)
+def nuevo_equipo(request):
+    if request.method == 'POST':
+        form = EquipoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_equipos')
+    else:
+        form = EquipoForm()
+    return render(request, 'inventario/nuevo_equipo.html', {'form': form})
+
+@login_required
+@permission_required('inventario.change_equipo', raise_exception=True)
+def editar_equipo(request, equipo_id):
+    equipo = get_object_or_404(Equipo, id=equipo_id)
+    
+    if request.method == 'POST':
+        # Le pasamos instance=equipo para que Django sepa que va a EDITAR este registro, no a crear uno nuevo
+        form = EquipoForm(request.POST, instance=equipo)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_equipos')
+    else:
+        form = EquipoForm(instance=equipo)
+        
+    return render(request, 'inventario/editar_equipo.html', {'form': form, 'equipo': equipo})

@@ -4,10 +4,44 @@
 
 {% block content %}
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white border-bottom-0 pt-4 pb-2">
-        <h3 class="text-tecnm fw-bold mb-1"><i class="fa-solid fa-laptop text-secondary me-2"></i>Catálogo de Equipos</h3>
-        <p class="text-muted small mb-0">Gestión y control de inventario del instituto.</p>
+    <div class="card-header bg-white border-bottom-0 pt-4 pb-2 d-flex justify-content-between align-items-center">
+        <div>
+            <h3 class="text-tecnm fw-bold mb-1"><i class="fa-solid fa-desktop text-secondary me-2"></i>Catálogo de Equipos</h3>
+            <p class="text-muted small mb-0">Gestión y control de inventario del instituto.</p>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2 w-70 justify-content-end">
+            
+            <form method="GET" class="d-flex gap-2 mb-0 w-75">
+                <select name="edificio" class="form-select rounded-pill form-select-sm" onchange="this.form.submit()">
+                    <option value="">🏢 Todos los Edificios</option>
+                    {% for ed in edificios %}
+                        <option value="{{ ed.id }}" {% if edificio_seleccionado == ed.id|stringformat:"s" %}selected{% endif %}>
+                            {{ ed.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <div class="input-group input-group-sm">
+                    <input type="text" name="q" value="{{ query|default_if_none:'' }}" class="form-control rounded-start-pill" placeholder="Buscar serie o marca...">
+                    <button type="submit" class="btn btn-primary rounded-end-pill">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+                
+                {% if query or edificio_seleccionado %}
+                    <a href="{% url 'lista_equipos' %}" class="btn btn-sm btn-outline-danger rounded-circle"><i class="fa-solid fa-xmark"></i></a>
+                {% endif %}
+            </form>
+
+            {% if perms.inventario.add_equipo %}
+                <a href="{% url 'nuevo_equipo' %}" class="btn btn-sm btn-success fw-bold rounded-pill shadow-sm px-3 text-nowrap">
+                    <i class="fa-solid fa-plus me-1"></i> Nuevo Equipo
+                </a>
+            {% endif %}
+        </div>
     </div>
+    
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -15,7 +49,7 @@
                     <tr>
                         <th class="ps-4">Marca y Modelo</th>
                         <th>No. de Serie</th>
-                        <th>Estado</th>
+                        <th>Ubicación</th> <th>Estado</th>
                         <th class="pe-4 text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -34,6 +68,14 @@
                             </div>
                         </td>
                         <td class="font-monospace text-secondary small">{{ equipo.numero_serie }}</td>
+                        
+                        <td>
+                            <span class="text-dark fw-semibold small">
+                                <i class="fa-solid fa-building text-muted me-1"></i> 
+                                {{ equipo.edificio.nombre|default:"Sin ubicación" }}
+                            </span>
+                        </td>
+                        
                         <td>
                             {% if equipo.estado == 'Activo' %}
                                 <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">
@@ -49,19 +91,29 @@
                                 </span>
                             {% endif %}
                         </td>
-                        <td class="pe-4 text-center">
+                        <td class="pe-4 text-center text-nowrap">
+                            <a href="{% url 'detalle_equipo' equipo.id %}" class="btn btn-sm btn-outline-primary rounded-pill me-1 shadow-sm">
+                                <i class="fa-solid fa-eye me-1"></i> Detalles
+                            </a>
+
+                            {% if perms.inventario.change_equipo %}
+                                <a href="{% url 'editar_equipo' equipo.id %}" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill me-1 shadow-sm">
+                                    <i class="fa-solid fa-pen me-1"></i> Editar
+                                </a>
+                            {% endif %}
+                            
                             <a href="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=http://127.0.0.1:8000{% url 'detalle_equipo' equipo.id %}" 
-   target="_blank" 
-   class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-sm">
-    <i class="fa-solid fa-qrcode me-1"></i> Ver QR
-</a>
+                               target="_blank" 
+                               class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-sm">
+                                <i class="fa-solid fa-qrcode me-1"></i> QR
+                            </a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center text-muted py-5">
+                        <td colspan="5" class="text-center text-muted py-5">
                             <i class="fa-solid fa-box-open fa-3x text-light mb-3"></i><br>
-                            No hay equipos registrados en el inventario.
+                            No hay equipos registrados que coincidan con los filtros.
                         </td>
                     </tr>
                     {% endfor %}

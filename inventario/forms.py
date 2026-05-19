@@ -38,3 +38,22 @@ class MantenimientoForm(forms.ModelForm):
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': '¿Qué se le hizo al equipo?'}),
             'tecnico': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del técnico (Ej. Abraham o Erick)'}),
         }
+
+class EquipoForm(forms.ModelForm):
+    class Meta:
+        model = Equipo
+        # Agregamos 'sistema_operativo' a la lista
+        fields = ['edificio', 'numero_serie', 'marca', 'modelo', 'sistema_operativo', 'procesador', 'ram', 'disco_duro', 'estado']
+        
+        widgets = {
+            'edificio': forms.Select(attrs={'class': 'form-select'}),
+            'numero_serie': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de serie único'}),
+            'marca': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. HP, Dell, Asus'}),
+            'modelo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. ThinkPad, Latitude'}),
+            # Nuevo selector para el OS
+            'sistema_operativo': forms.Select(attrs={'class': 'form-select'}),
+            'procesador': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Intel Core i5 / Ryzen 5'}),
+            'ram': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. 8GB, 16GB'}),
+            'disco_duro': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. SSD 512GB / HDD 1TB'}),
+            'estado': forms.Select(attrs={'class': 'form-select'}),
+        }
