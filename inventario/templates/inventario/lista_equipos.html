@@ -13,14 +13,16 @@
         <div class="d-flex align-items-center gap-2 w-70 justify-content-end">
             
             <form method="GET" class="d-flex gap-2 mb-0 w-75">
-                <select name="edificio" class="form-select rounded-pill form-select-sm" onchange="this.form.submit()">
-                    <option value="">🏢 Todos los Edificios</option>
-                    {% for ed in edificios %}
-                        <option value="{{ ed.id }}" {% if edificio_seleccionado == ed.id|stringformat:"s" %}selected{% endif %}>
+                {% if not request.user.perfil %}
+                    <select name="edificio" class="form-select rounded-pill form-select-sm" onchange="this.form.submit()">
+                        <option value="">🏢 Todos los Edificios</option>
+                {% for ed in edificios %}
+                    <option value="{{ ed.id }}" {% if edificio_seleccionado == ed.id|stringformat:"s" %}selected{% endif %}>
                             {{ ed.nombre }}
-                        </option>
-                    {% endfor %}
-                </select>
+                    </option>
+                {% endfor %}
+                    </select>
+                {% endif %}
 
                 <div class="input-group input-group-sm">
                     <input type="text" name="q" value="{{ query|default_if_none:'' }}" class="form-control rounded-start-pill" placeholder="Buscar serie o marca...">

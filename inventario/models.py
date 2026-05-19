@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+import uuid
 
 # 1. NUEVA TABLA: Jerarquía de Edificios
 class Edificio(models.Model):
@@ -6,6 +8,13 @@ class Edificio(models.Model):
     
     def __str__(self):
         return self.nombre
+
+class PerfilUsuario(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
+    edificio = models.ForeignKey(Edificio, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Edificio a su cargo")
+
+    def __str__(self):
+        return f"{self.user.username} - {self.edificio.nombre if self.edificio else 'Sin Edificio'}"
 
 class Equipo(models.Model):
     ESTADO_CHOICES = [
@@ -45,18 +54,28 @@ class Equipo(models.Model):
 class ReporteFalla(models.Model):
     ESTADO_REPORTE = [
         ('Pendiente', 'Pendiente de revisión'),
-        ('En Revision', 'En revisión por CC'), # Nuevo estado intermedio
+        ('En Revision', 'En revisión por CC'),
         ('Finalizado', 'Mantenimiento finalizado'),
     ]
 
+    # NUEVO: El Folio autogenerado
+    folio = models.CharField(max_length=15, unique=True, blank=True, null=True, verbose_name="Folio del Reporte")
+    
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE, verbose_name="Equipo que falla")
     fecha_reporte = models.DateTimeField(auto_now_add=True, verbose_name="Fecha y Hora del Reporte")
-    solicitante = models.CharField(max_length=100, verbose_name="¿Quién reporta?")
+    solicitante = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="¿Quién reporta?")
     descripcion_falla = models.TextField(verbose_name="Descripción del problema")
     estado = models.CharField(max_length=20, choices=ESTADO_REPORTE, default='Pendiente')
 
+    # MAGIA: Autogenerar el folio antes de guardar
+    def save(self, *args, **kwargs):
+        if not self.folio:
+            # Genera un folio tipo "REP-4F8A2"
+            self.folio = f"REP-{uuid.uuid4().hex[:5].upper()}"
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"Reporte: {self.equipo.numero_serie} - {self.estado}"
+        return f"[{self.folio}] {self.equipo.numero_serie} - {self.estado}"
 
 # 3. EL CEREBRO: Mantenimiento con reacción en cadena
 class Mantenimiento(models.Model):

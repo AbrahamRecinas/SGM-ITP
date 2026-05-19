@@ -4,11 +4,21 @@ from django.db.models import Q
 from .models import Equipo, ReporteFalla, Mantenimiento, Edificio
 from .forms import ReporteFallaForm, AtenderReporteForm, MantenimientoForm, EquipoForm
 
+@login_required
 def lista_equipos(request):
     query = request.GET.get('q')
-    edificio_id = request.GET.get('edificio') # Capturamos si seleccionaron un edificio
+    edificio_id = request.GET.get('edificio')
     
+    # 1. Traemos los equipos
     equipos = Equipo.objects.all()
+    
+    # 2. AISLAMIENTO: Si es Admin de edificio, filtramos a la fuerza
+    if hasattr(request.user, 'perfil'):
+        equipos = equipos.filter(edificio=request.user.perfil.edificio)
+    else:
+        # Solo si es técnico aplicamos el filtro del menú desplegable
+        if edificio_id:
+            equipos = equipos.filter(edificio_id=edificio_id)
     
     # Filtro por barra de búsqueda
     if query:
@@ -31,10 +41,6 @@ def lista_equipos(request):
         'edificios': edificios,
         'edificio_seleccionado': edificio_id
     })
-def lista_reportes(request):
-    # order_by('-fecha_reporte') hace que los reportes más nuevos salgan hasta arriba
-    reportes = ReporteFalla.objects.all().order_by('-fecha_reporte')
-    return render(request, 'inventario/lista_reportes.html', {'reportes': reportes})
 
 def lista_mantenimientos(request):
     # Traemos los mantenimientos ordenados del más reciente al más antiguo
@@ -44,13 +50,19 @@ def lista_mantenimientos(request):
 @login_required
 def nuevo_reporte(request):
     if request.method == 'POST':
-        form = ReporteFallaForm(request.POST)
+        # Le pasamos el usuario al formulario
+        form = ReporteFallaForm(request.POST, usuario=request.user)
         if form.is_valid():
-            form.save()
+            reporte = form.save(commit=False)
+            
+            reporte.solicitante = request.user
+                
+            reporte.save()
             return redirect('lista_reportes')
     else:
-        form = ReporteFallaForm()
-    
+        # Le pasamos el usuario al formulario vacío
+        form = ReporteFallaForm(usuario=request.user)
+        
     return render(request, 'inventario/nuevo_reporte.html', {'form': form})
 
 # --- VISTA DE DETALLE CON QR ---
@@ -71,39 +83,51 @@ def detalle_equipo(request, equipo_id):
 @login_required
 @permission_required('inventario.change_reportefalla', raise_exception=True)
 def atender_reporte(request, reporte_id):
-    # Buscamos el reporte exacto por su ID
     reporte = get_object_or_404(ReporteFalla, id=reporte_id)
     
-    if request.method == 'POST':
-        form = AtenderReporteForm(request.POST, instance=reporte)
-        if form.is_valid():
-            form.save()
-            return redirect('lista_reportes')
-    else:
-        # Si apenas entra a la página, le mostramos el formulario pre-llenado con el estado actual
-        form = AtenderReporteForm(instance=reporte)
+    # Al presionar "Recibir e Iniciar Revisión"
+    if request.method == 'POST' and 'iniciar_revision' in request.POST:
+        reporte.estado = 'En Revision'
+        reporte.equipo.estado = 'Mantenimiento'  # Bloqueamos el equipo en el catálogo
+        reporte.equipo.save()
+        reporte.save()
+        return redirect('lista_reportes')
         
-    return render(request, 'inventario/atender_reporte.html', {'form': form, 'reporte': reporte})
+    return render(request, 'inventario/atender_reporte.html', {'reporte': reporte})
 
 # --- VISTA PARA REGISTRAR UN MANTENIMIENTO ---
 @login_required
 @permission_required('inventario.add_mantenimiento', raise_exception=True)
 def registrar_mantenimiento(request):
+    reporte_id = request.GET.get('reporte_id')
+    reporte = None
+    datos_iniciales = {}
+
+    # Si venimos desde un reporte, pre-llenamos la computadora y marcamos como Correctivo
+    if reporte_id:
+        reporte = get_object_or_404(ReporteFalla, id=reporte_id)
+        datos_iniciales['equipo'] = reporte.equipo
+        datos_iniciales['tipo'] = 'Correctivo'
+
     if request.method == 'POST':
         form = MantenimientoForm(request.POST)
         if form.is_valid():
-            # Magia de Django: Pausamos el guardado (commit=False)
             mantenimiento = form.save(commit=False)
-            # Le inyectamos a la fuerza el estado Terminado
-            mantenimiento.estado_mantenimiento = 'Terminado'
-            # Ahora sí, guardamos en la base de datos
-            mantenimiento.save()
             
-            return redirect('lista_mantenimientos')
+            # Autocompletado silencioso
+            mantenimiento.tecnico = request.user
+            mantenimiento.estado_mantenimiento = 'Terminado'
+            
+            if reporte_id:
+                reporte = get_object_or_404(ReporteFalla, id=reporte_id)
+                mantenimiento.reporte_vinculado = reporte
+                
+            mantenimiento.save() # Guarda y dispara el Efecto Dominó de Erick
+            return redirect('lista_reportes')
     else:
-        form = MantenimientoForm()
-        
-    return render(request, 'inventario/registrar_mantenimiento.html', {'form': form})
+        form = MantenimientoForm(initial=datos_iniciales)
+
+    return render(request, 'inventario/registrar_mantenimiento.html', {'form': form, 'reporte': reporte})
 
 @login_required
 @permission_required('inventario.add_equipo', raise_exception=True)
@@ -132,3 +156,32 @@ def editar_equipo(request, equipo_id):
         form = EquipoForm(instance=equipo)
         
     return render(request, 'inventario/editar_equipo.html', {'form': form, 'equipo': equipo})
+
+@login_required
+def lista_reportes(request):
+    query = request.GET.get('q')
+    estado_filtro = request.GET.get('estado')
+    
+    reportes = ReporteFalla.objects.all().order_by('-fecha_reporte')
+    
+    # 1. AISLAMIENTO: Si es Admin de Edificio, solo ve los de su edificio
+    if hasattr(request.user, 'perfil'):
+        reportes = reportes.filter(equipo__edificio=request.user.perfil.edificio)
+
+    # 2. BÚSQUEDA (Folio, Solicitante o Serie del equipo)
+    if query:
+        reportes = reportes.filter(
+            Q(folio__icontains=query) |
+            Q(solicitante__username__icontains=query) | # Buscamos por nombre de usuario
+            Q(equipo__numero_serie__icontains=query)
+        )
+        
+    # 3. FILTRO POR ESTADO
+    if estado_filtro:
+        reportes = reportes.filter(estado=estado_filtro)
+        
+    return render(request, 'inventario/lista_reportes.html', {
+        'reportes': reportes,
+        'query': query,
+        'estado_filtro': estado_filtro
+    })
