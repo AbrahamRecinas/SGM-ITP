@@ -4,76 +4,95 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2 class="fw-bold text-dark">
-                ¡Hola, {{ request.user.first_name|default:request.user.username }}! 👋
-            </h2>
-            <p class="text-muted">
+    
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold text-dark mb-0">¡Hola, {{ request.user.first_name|default:request.user.username }}! 👋</h2>
+            <p class="text-muted mt-1 mb-0">
                 {% if request.user.perfil %}
                     Panel de Administración: <strong>{{ request.user.perfil.edificio.nombre }}</strong>
                 {% else %}
-                    Panel General de Control - Centro de Cómputo
+                    Centro de Mando Técnico - ITP
                 {% endif %}
             </p>
         </div>
+        
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            {% if request.user.perfil %}
+                <a href="{% url 'nuevo_reporte' %}" class="btn btn-danger rounded-pill fw-bold shadow-sm px-4 py-2">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i> Reportar Falla
+                </a>
+            {% else %}
+                <a href="{% url 'registrar_mantenimiento' %}" class="btn btn-success rounded-pill fw-bold shadow-sm px-4 py-2">
+                    <i class="fa-solid fa-plus me-1"></i> Nuevo Mantenimiento
+                </a>
+            {% endif %}
+        </div>
     </div>
 
+    {% if request.user.perfil %}
     <div class="row g-4">
-        
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100 bg-primary text-white">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-tecnm text-white">
                 <div class="card-body p-4 d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-uppercase fw-semibold mb-1 opacity-75">Total de Equipos</h6>
+                        <h6 class="text-uppercase fw-semibold mb-1 opacity-75">Mis Equipos</h6>
                         <h2 class="display-5 fw-bold mb-0">{{ total_equipos }}</h2>
                     </div>
                     <i class="fa-solid fa-desktop fa-3x opacity-50"></i>
                 </div>
-                <div class="card-footer bg-transparent border-0 pt-0 pb-3">
-                    <a href="{% url 'lista_equipos' %}" class="text-white text-decoration-none small fw-bold">
-                        Ver inventario <i class="fa-solid fa-arrow-right ms-1"></i>
-                    </a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-warning text-dark">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase fw-semibold mb-1 opacity-75">Mis Reportes Abiertos</h6>
+                        <h2 class="display-5 fw-bold mb-0">{{ reportes_pendientes }}</h2>
+                    </div>
+                    <i class="fa-regular fa-clock fa-3x opacity-50"></i>
                 </div>
             </div>
         </div>
+    </div>
 
+    {% else %}
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 bg-primary text-white">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase fw-semibold mb-1 opacity-75">Equipos ITP</h6>
+                        <h2 class="display-5 fw-bold mb-0">{{ total_equipos }}</h2>
+                    </div>
+                    <i class="fa-solid fa-server fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
         <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100 bg-danger text-white">
                 <div class="card-body p-4 d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-uppercase fw-semibold mb-1 opacity-75">Tickets Pendientes</h6>
+                        <h6 class="text-uppercase fw-semibold mb-1 opacity-75">Fallas Pendientes</h6>
                         <h2 class="display-5 fw-bold mb-0">{{ reportes_pendientes }}</h2>
                     </div>
-                    <i class="fa-solid fa-circle-exclamation fa-3x opacity-50"></i>
-                </div>
-                <div class="card-footer bg-transparent border-0 pt-0 pb-3">
-                    <a href="{% url 'lista_reportes' %}?estado=Pendiente" class="text-white text-decoration-none small fw-bold">
-                        Ir a bandeja <i class="fa-solid fa-arrow-right ms-1"></i>
-                    </a>
+                    <i class="fa-solid fa-triangle-exclamation fa-3x opacity-50"></i>
                 </div>
             </div>
         </div>
-
         <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100 bg-warning text-dark">
                 <div class="card-body p-4 d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-uppercase fw-semibold mb-1 opacity-75">En Mantenimiento</h6>
+                        <h6 class="text-uppercase fw-semibold mb-1 opacity-75">En Taller / Mantenimiento</h6>
                         <h2 class="display-5 fw-bold mb-0">{{ equipos_mantenimiento }}</h2>
                     </div>
                     <i class="fa-solid fa-screwdriver-wrench fa-3x opacity-50"></i>
                 </div>
-                {% if not request.user.perfil %}
-                <div class="card-footer bg-transparent border-0 pt-0 pb-3">
-                    <a href="{% url 'lista_equipos' %}?estado=Mantenimiento" class="text-dark text-decoration-none small fw-bold">
-                        Ver equipos <i class="fa-solid fa-arrow-right ms-1"></i>
-                    </a>
-                </div>
-                {% endif %}
             </div>
         </div>
-
     </div>
+    {% endif %}
+    
 </div>
 {% endblock %}

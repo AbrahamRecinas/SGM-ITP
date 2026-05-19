@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required, permission_required # <-- Agregamos permission_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
+from django.utils import timezone
 from .models import Equipo, ReporteFalla, Mantenimiento, Edificio
 from .forms import ReporteFallaForm, AtenderReporteForm, MantenimientoForm, EquipoForm
 
@@ -73,10 +74,13 @@ def detalle_equipo(request, equipo_id):
     
     # Buscamos los últimos 5 reportes de este equipo específico
     reportes = ReporteFalla.objects.filter(equipo=equipo).order_by('-fecha_reporte')[:5]
+    # NUEVO: Traemos todo el historial médico de esta PC
+    mantenimientos = Mantenimiento.objects.filter(equipo=equipo).order_by('-fecha')
     
     return render(request, 'inventario/detalle_equipo.html', {
         'equipo': equipo,
-        'reportes': reportes
+        'reportes': reportes,
+        'mantenimientos': mantenimientos
     })
 
 # --- NUEVA VISTA PARA ATENDER REPORTES (SOLO TÉCNICOS) ---
@@ -117,13 +121,16 @@ def registrar_mantenimiento(request):
             # Autocompletado silencioso
             mantenimiento.tecnico = request.user
             mantenimiento.estado_mantenimiento = 'Terminado'
+            mantenimiento.fecha = timezone.now()
             
             if reporte_id:
                 reporte = get_object_or_404(ReporteFalla, id=reporte_id)
                 mantenimiento.reporte_vinculado = reporte
-                
-            mantenimiento.save() # Guarda y dispara el Efecto Dominó de Erick
-            return redirect('lista_reportes')
+                mantenimiento.save() # Guarda y dispara el Efecto Dominó de Erick
+                return redirect('lista_reportes') # Regresa a reportes si atendió una falla
+            else:
+                mantenimiento.save()
+                return redirect('lista_mantenimientos') # Va al historial si fue de rutina       
     else:
         form = MantenimientoForm(initial=datos_iniciales)
 

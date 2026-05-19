@@ -12,7 +12,7 @@
 
     <div class="row g-4">
         <div class="col-md-7">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-tecnm text-white pt-3 pb-2 d-flex justify-content-between align-items-center">
                     <h5 class="fw-bold mb-0"><i class="fa-solid fa-laptop me-2"></i>Ficha Técnica del Equipo</h5>
                     <span class="badge {% if equipo.estado == 'Activo' %}bg-success{% elif equipo.estado == 'Mantenimiento' %}bg-warning text-dark{% else %}bg-danger{% endif %} rounded-pill px-3">
@@ -66,6 +66,47 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-success text-white pt-3 pb-2">
+                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-file-signature me-2"></i> Historial de Mantenimientos</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if mantenimientos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 small text-dark">
+                            <thead class="table-light text-muted">
+                                <tr>
+                                    <th class="ps-3">FECHA</th>
+                                    <th>TIPO</th>
+                                    <th>DESCRIPCIÓN</th>
+                                    <th>TÉCNICO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mant in mantenimientos %}
+                                <tr>
+                                    <td class="fw-bold ps-3">{{ mant.fecha|date:"d M Y" }}</td>
+                                    <td>
+                                        <span class="badge {% if mant.tipo == 'Correctivo' %}bg-danger{% else %}bg-info text-dark{% endif %}">
+                                            {{ mant.tipo }}
+                                        </span>
+                                    </td>
+                                    <td>{{ mant.descripcion|truncatechars:45 }}</td>
+                                    <td>{{ mant.tecnico }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="fa-solid fa-check-circle fa-2x mb-2 text-success opacity-50"></i>
+                        <p class="mb-0">Este equipo no tiene mantenimientos registrados aún.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
 
         <div class="col-md-5">
@@ -84,7 +125,7 @@
                                     </span>
                                 </div>
                                 <p class="mb-1 small fw-semibold text-dark">{{ reporte.descripcion_falla|truncatechars:60 }}</p>
-                                <small class="text-muted">Reportó: {{ reporte.solicitante }}</small>
+                                <small class="text-muted">Reportó: {{ reporte.solicitante.get_full_name|default:reporte.solicitante.username }}</small>
                             </div>
                         {% empty %}
                             <div class="text-center text-muted py-5">
