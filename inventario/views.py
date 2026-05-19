@@ -185,3 +185,27 @@ def lista_reportes(request):
         'query': query,
         'estado_filtro': estado_filtro
     })
+
+@login_required
+def dashboard(request):
+    # 1. Contadores base
+    total_equipos = Equipo.objects.count()
+    equipos_mantenimiento = Equipo.objects.filter(estado='Mantenimiento').count()
+    
+    # 2. RBAC: Si es Admin de Edificio, las métricas son solo de su zona
+    if hasattr(request.user, 'perfil'):
+        edificio_usuario = request.user.perfil.edificio
+        total_equipos = Equipo.objects.filter(edificio=edificio_usuario).count()
+        equipos_mantenimiento = Equipo.objects.filter(edificio=edificio_usuario, estado='Mantenimiento').count()
+        reportes_pendientes = ReporteFalla.objects.filter(equipo__edificio=edificio_usuario, estado='Pendiente').count()
+    else:
+        # Si es Técnico, ve las métricas de todo el ITP
+        reportes_pendientes = ReporteFalla.objects.filter(estado='Pendiente').count()
+
+    contexto = {
+        'total_equipos': total_equipos,
+        'equipos_mantenimiento': equipos_mantenimiento,
+        'reportes_pendientes': reportes_pendientes,
+    }
+    
+    return render(request, 'inventario/dashboard.html', contexto)

@@ -20,4 +20,5 @@ urlpatterns = [
     path('mantenimientos/nuevo/', views.registrar_mantenimiento, name='registrar_mantenimiento'),
     path('equipos/nuevo/', views.nuevo_equipo, name='nuevo_equipo'),
     path('equipos/<int:equipo_id>/editar/', views.editar_equipo, name='editar_equipo'),
+    path('', views.dashboard, name='dashboard'),
 ]
