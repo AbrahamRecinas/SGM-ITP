@@ -3,6 +3,17 @@
 {% block title %}Inicio - SGM-ITP{% endblock %}
 
 {% block content %}
+<style>
+    .card-hover {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        cursor: pointer;
+    }
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.15)!important;
+    }
+</style>
+
 <div class="container mt-4">
     
     <div class="row mb-4 align-items-center">
@@ -19,12 +30,16 @@
         
         <div class="col-md-4 text-md-end mt-3 mt-md-0">
             {% if request.user.perfil %}
-                <a href="{% url 'nuevo_reporte' %}" class="btn btn-danger rounded-pill fw-bold shadow-sm px-4 py-2">
-                    <i class="fa-solid fa-triangle-exclamation me-1"></i> Reportar Falla
+                <a href="{% url 'nuevo_reporte' %}" class="btn btn-danger rounded-pill fw-bold shadow-sm px-4 py-2 w-100 w-md-auto">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i> 
+                    <span class="d-none d-md-inline">Reportar Falla</span>
+                    <span class="d-inline d-md-none">Nuevo Reporte</span>
                 </a>
             {% else %}
-                <a href="{% url 'registrar_mantenimiento' %}" class="btn btn-success rounded-pill fw-bold shadow-sm px-4 py-2">
-                    <i class="fa-solid fa-plus me-1"></i> Nuevo Mantenimiento
+                <a href="{% url 'registrar_mantenimiento' %}" class="btn btn-success rounded-pill fw-bold shadow-sm px-4 py-2 w-100 w-md-auto">
+                    <i class="fa-solid fa-plus me-1"></i> 
+                    <span class="d-none d-md-inline">Nuevo Mantenimiento</span>
+                    <span class="d-inline d-md-none">Mantenimiento</span>
                 </a>
             {% endif %}
         </div>
@@ -33,8 +48,8 @@
     {% if request.user.perfil %}
     <div class="row g-4">
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm h-100 bg-tecnm text-white">
-                <div class="card-body p-4 d-flex justify-content-between align-items-center">
+            <div class="card border-0 shadow-sm h-100 bg-tecnm text-white card-hover position-relative">
+                <a href="{% url 'lista_equipos' %}" class="stretched-link"></a> <div class="card-body p-4 d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase fw-semibold mb-1 opacity-75">Mis Equipos</h6>
                         <h2 class="display-5 fw-bold mb-0">{{ total_equipos }}</h2>
@@ -44,7 +59,8 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm h-100 bg-warning text-dark">
+            <div class="card border-0 shadow-sm h-100 bg-warning text-dark card-hover position-relative">
+                <a href="{% url 'lista_reportes' %}?estado=Pendiente" class="stretched-link"></a>
                 <div class="card-body p-4 d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase fw-semibold mb-1 opacity-75">Mis Reportes Abiertos</h6>
@@ -59,7 +75,8 @@
     {% else %}
     <div class="row g-4">
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100 bg-primary text-white">
+            <div class="card border-0 shadow-sm h-100 bg-primary text-white card-hover position-relative">
+                <a href="{% url 'lista_equipos' %}" class="stretched-link"></a>
                 <div class="card-body p-4 d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase fw-semibold mb-1 opacity-75">Equipos ITP</h6>
@@ -70,7 +87,8 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100 bg-danger text-white">
+            <div class="card border-0 shadow-sm h-100 bg-danger text-white card-hover position-relative">
+                <a href="{% url 'lista_reportes' %}?estado=Pendiente" class="stretched-link"></a>
                 <div class="card-body p-4 d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase fw-semibold mb-1 opacity-75">Fallas Pendientes</h6>
@@ -81,7 +99,8 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100 bg-warning text-dark">
+            <div class="card border-0 shadow-sm h-100 bg-warning text-dark card-hover position-relative">
+                <a href="{% url 'lista_mantenimientos' %}" class="stretched-link"></a>
                 <div class="card-body p-4 d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase fw-semibold mb-1 opacity-75">En Taller / Mantenimiento</h6>

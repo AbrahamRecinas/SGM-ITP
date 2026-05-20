@@ -12,6 +12,7 @@
 
     <div class="row g-4">
         <div class="col-md-7">
+            
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-tecnm text-white pt-3 pb-2 d-flex justify-content-between align-items-center">
                     <h5 class="fw-bold mb-0"><i class="fa-solid fa-laptop me-2"></i>Ficha Técnica del Equipo</h5>
@@ -67,72 +68,84 @@
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0 mt-4">
-                <div class="card-header bg-success text-white pt-3 pb-2">
-                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-file-signature me-2"></i> Historial de Mantenimientos</h5>
-                </div>
-                <div class="card-body p-0">
-                    {% if mantenimientos %}
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0 small text-dark">
-                            <thead class="table-light text-muted">
-                                <tr>
-                                    <th class="ps-3">FECHA</th>
-                                    <th>TIPO</th>
-                                    <th>DESCRIPCIÓN</th>
-                                    <th>TÉCNICO</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for mant in mantenimientos %}
-                                <tr>
-                                    <td class="fw-bold ps-3">{{ mant.fecha|date:"d M Y" }}</td>
-                                    <td>
-                                        <span class="badge {% if mant.tipo == 'Correctivo' %}bg-danger{% else %}bg-info text-dark{% endif %}">
-                                            {{ mant.tipo }}
-                                        </span>
-                                    </td>
-                                    <td>{{ mant.descripcion|truncatechars:45 }}</td>
-                                    <td>{{ mant.tecnico }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+            <div class="card border-success shadow-sm mb-4">
+                <a href="#collapseMantenimientos" class="card-header bg-success text-white text-decoration-none d-flex justify-content-between align-items-center py-3" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapseMantenimientos">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fa-solid fa-file-signature me-2"></i>Historial de Mantenimientos
+                    </h5>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </a>
+                
+                <div class="collapse" id="collapseMantenimientos">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 text-center">
+                                <thead class="table-light text-muted small">
+                                    <tr>
+                                        <th class="ps-3 text-start">FECHA</th>
+                                        <th>TIPO</th>
+                                        <th class="text-start">DESCRIPCIÓN</th>
+                                        <th class="pe-3 text-start">TÉCNICO</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for mant in mantenimientos %}
+                                    <tr>
+                                        <td class="ps-3 text-start fw-bold small">{{ mant.fecha|date:"d M Y" }}</td>
+                                        <td>
+                                            {% if mant.tipo == 'Preventivo' %}
+                                                <span class="badge bg-info text-dark rounded-pill px-2">Preventivo</span>
+                                            {% else %}
+                                                <span class="badge bg-danger rounded-pill px-2">Correctivo</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-start small">{{ mant.descripcion }}</td>
+                                        <td class="pe-3 text-start small">{{ mant.tecnico.username|default:"N/A" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">
+                                            <i class="fa-solid fa-wrench fa-2x mb-2 opacity-50"></i><br>
+                                            Este equipo aún no tiene mantenimientos registrados.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    {% else %}
-                    <div class="p-4 text-center text-muted">
-                        <i class="fa-solid fa-check-circle fa-2x mb-2 text-success opacity-50"></i>
-                        <p class="mb-0">Este equipo no tiene mantenimientos registrados aún.</p>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
 
         <div class="col-md-5">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
+                <a href="#collapseReportes" class="card-header bg-white pt-3 pb-2 border-bottom-0 text-decoration-none d-flex justify-content-between align-items-center" data-bs-toggle="collapse" role="button" aria-expanded="true" aria-controls="collapseReportes">
                     <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-clock-history me-2 text-secondary"></i>Últimos Reportes</h5>
-                </div>
-                <div class="card-body p-3">
-                    <div class="list-group list-group-flush">
-                        {% for reporte in reportes %}
-                            <div class="list-group-item px-0 py-3">
-                                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-                                    <small class="text-muted">{{ reporte.fecha_reporte|date:"d M Y" }}</small>
-                                    <span class="badge {% if reporte.estado == 'Pendiente' %}bg-danger{% elif reporte.estado == 'En Revision' %}bg-warning text-dark{% else %}bg-success{% endif %} rounded-pill btn-xs px-2">
-                                        {{ reporte.estado }}
-                                    </span>
+                    <i class="fa-solid fa-chevron-down text-dark"></i>
+                </a>
+                
+                <div class="collapse show" id="collapseReportes">
+                    <div class="card-body p-3">
+                        <div class="list-group list-group-flush">
+                            {% for reporte in reportes %}
+                                <div class="list-group-item px-0 py-3">
+                                    <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                        <small class="text-muted">{{ reporte.fecha_reporte|date:"d M Y" }}</small>
+                                        <span class="badge {% if reporte.estado == 'Pendiente' %}bg-danger{% elif reporte.estado == 'En Revision' %}bg-warning text-dark{% else %}bg-success{% endif %} rounded-pill btn-xs px-2">
+                                            {{ reporte.estado }}
+                                        </span>
+                                    </div>
+                                    <p class="mb-1 small fw-semibold text-dark">{{ reporte.descripcion_falla|truncatechars:60 }}</p>
+                                    <small class="text-muted">Reportó: {{ reporte.solicitante.get_full_name|default:reporte.solicitante.username }}</small>
                                 </div>
-                                <p class="mb-1 small fw-semibold text-dark">{{ reporte.descripcion_falla|truncatechars:60 }}</p>
-                                <small class="text-muted">Reportó: {{ reporte.solicitante.get_full_name|default:reporte.solicitante.username }}</small>
-                            </div>
-                        {% empty %}
-                            <div class="text-center text-muted py-5">
-                                <i class="fa-solid fa-circle-check fa-2x text-success mb-2"></i>
-                                <p class="small mb-0">Este equipo no tiene reportes de falla vigentes o históricos.</p>
-                            </div>
-                        {% endfor %}
+                            {% empty %}
+                                <div class="text-center text-muted py-5">
+                                    <i class="fa-solid fa-circle-check fa-2x text-success mb-2"></i>
+                                    <p class="small mb-0">Este equipo no tiene reportes de falla vigentes o históricos.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>

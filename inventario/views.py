@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.utils import timezone
 from .models import Equipo, ReporteFalla, Mantenimiento, Edificio
 from .forms import ReporteFallaForm, AtenderReporteForm, MantenimientoForm, EquipoForm
-
+from django.urls import reverse
 @login_required
 def lista_equipos(request):
     query = request.GET.get('q')
@@ -61,8 +61,15 @@ def nuevo_reporte(request):
             reporte.save()
             return redirect('lista_reportes')
     else:
-        # Le pasamos el usuario al formulario vacío
-        form = ReporteFallaForm(usuario=request.user)
+        # MAGIA: Atrapamos el ID si venimos del escáner QR
+        equipo_id = request.GET.get('equipo_id')
+        
+        if equipo_id:
+            # Le pasamos el usuario y PRE-LLENAMOS el equipo
+            form = ReporteFallaForm(usuario=request.user, initial={'equipo': equipo_id})
+        else:
+            # Le pasamos el usuario al formulario vacío (flujo normal)
+            form = ReporteFallaForm(usuario=request.user)
         
     return render(request, 'inventario/nuevo_reporte.html', {'form': form})
 
@@ -102,16 +109,28 @@ def atender_reporte(request, reporte_id):
 # --- VISTA PARA REGISTRAR UN MANTENIMIENTO ---
 @login_required
 @permission_required('inventario.add_mantenimiento', raise_exception=True)
+@login_required
 def registrar_mantenimiento(request):
     reporte_id = request.GET.get('reporte_id')
+    # NUEVO: Atrapamos el ID del equipo si venimos del escáner QR directo
+    equipo_id = request.GET.get('equipo_id')
+    
     reporte = None
     datos_iniciales = {}
 
-    # Si venimos desde un reporte, pre-llenamos la computadora y marcamos como Correctivo
+    # Si venimos desde un reporte (Efecto Dominó de Erick)
     if reporte_id:
         reporte = get_object_or_404(ReporteFalla, id=reporte_id)
         datos_iniciales['equipo'] = reporte.equipo
         datos_iniciales['tipo'] = 'Correctivo'
+    
+    # NUEVO: Si venimos desde el escáner QR de mantenimientos
+    elif equipo_id:
+        # Buscamos la máquina para asegurar que exista y pre-llenamos el campo
+        equipo = get_object_or_404(Equipo, id=equipo_id)
+        datos_iniciales['equipo'] = equipo
+        # Podemos dejar el tipo vacío o sugerir 'Preventivo' por defecto si es de rutina
+        datos_iniciales['tipo'] = 'Preventivo' 
 
     if request.method == 'POST':
         form = MantenimientoForm(request.POST)
@@ -126,11 +145,11 @@ def registrar_mantenimiento(request):
             if reporte_id:
                 reporte = get_object_or_404(ReporteFalla, id=reporte_id)
                 mantenimiento.reporte_vinculado = reporte
-                mantenimiento.save() # Guarda y dispara el Efecto Dominó de Erick
-                return redirect('lista_reportes') # Regresa a reportes si atendió una falla
+                mantenimiento.save() 
+                return redirect('lista_reportes') 
             else:
                 mantenimiento.save()
-                return redirect('lista_mantenimientos') # Va al historial si fue de rutina       
+                return redirect('lista_mantenimientos')       
     else:
         form = MantenimientoForm(initial=datos_iniciales)
 
@@ -216,3 +235,58 @@ def dashboard(request):
     }
     
     return render(request, 'inventario/dashboard.html', contexto)
+
+@login_required
+def imprimir_etiquetas(request):
+    equipos = Equipo.objects.all().order_by('edificio', 'numero_serie')
+    
+    # Aislamiento: El Admin de Edificio solo ve sus propias computadoras
+    if hasattr(request.user, 'perfil'):
+        equipos = equipos.filter(edificio=request.user.perfil.edificio)
+        
+    # NUEVO: Si entramos desde el botón de un equipo específico, filtramos solo ese
+    equipo_id = request.GET.get('equipo_id')
+    if equipo_id:
+        equipos = equipos.filter(id=equipo_id)
+        
+    return render(request, 'inventario/imprimir_etiquetas.html', {'equipos': equipos})
+
+from django.contrib import messages
+from django.shortcuts import redirect
+
+@login_required
+def abrir_escaner(request):
+    # 'origen' nos dirá de qué botón viene el usuario (detalle, reporte, mantenimiento)
+    origen = request.GET.get('origen', 'detalle')
+    return render(request, 'inventario/escaner_qr.html', {'origen': origen})
+
+@login_required
+def procesar_qr(request):
+    numero_serie = request.GET.get('serie')
+    origen = request.GET.get('origen', 'detalle')
+
+    if not numero_serie:
+        messages.error(request, "No se detectó ningún código.")
+        return redirect('dashboard')
+
+    # Buscamos la computadora por su número de serie
+    equipo = Equipo.objects.filter(numero_serie=numero_serie).first()
+
+    if not equipo:
+        messages.warning(request, f"No se encontró ningún equipo con la serie: {numero_serie}")
+        return redirect('dashboard')
+
+    # MAGIA: Redirección según el contexto
+    if origen == 'reporte':
+        # Construimos la URL: /reportes/nuevo/?equipo_id=5
+        url_reporte = reverse('nuevo_reporte')
+        return redirect(f"{url_reporte}?equipo_id={equipo.id}") 
+        
+    elif origen == 'mantenimiento':
+        url_mantenimiento = reverse('registrar_mantenimiento')
+        return redirect(f"{url_mantenimiento}?equipo_id={equipo.id}")
+        
+    else:
+        # Por defecto, te manda a ver la ficha técnica (desde el celular)
+        return redirect('detalle_equipo', equipo_id=equipo.id)
+    

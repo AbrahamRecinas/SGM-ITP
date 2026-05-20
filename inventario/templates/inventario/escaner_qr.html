@@ -1,0 +1,61 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Escanear Equipo - SGM-ITP{% endblock %}
+
+{% block content %}
+<div class="container d-flex flex-column align-items-center justify-content-center py-4">
+    
+    <div class="text-center mb-3">
+        <h4 class="fw-bold"><i class="fa-solid fa-camera me-2"></i>Escáner de Activos</h4>
+        <p class="text-muted small">Apunta la cámara al código QR del equipo</p>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden" style="width: 100%; max-width: 500px;">
+        <div id="reader" width="100%"></div>
+    </div>
+
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-danger rounded-pill px-4 mt-4">
+        <i class="fa-solid fa-xmark me-2"></i>Cancelar
+    </a>
+
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+    // Leemos el origen desde la vista de Django
+    const origenContexto = "{{ origen }}";
+
+    // Instanciamos el lector directamente para mayor control
+    const html5QrCode = new Html5Qrcode("reader");
+
+    function onScanSuccess(decodedText, decodedResult) {
+        // Apagamos la cámara al leer el código para no escanearlo 10 veces seguidas
+        html5QrCode.stop().then(() => {
+            // Redirigimos al servidor con el número de serie detectado
+            window.location.href = `{% url 'procesar_qr' %}?serie=${decodedText}&origen=${origenContexto}`;
+        }).catch((err) => {
+            console.error("Error al detener la cámara", err);
+        });
+    }
+
+    function onScanFailure(error) {
+        // Ignorar errores silenciosos (pasa cuando aún no enfoca bien el QR)
+    }
+
+    // Configuración del cuadrito de enfoque
+    const configuracion = { 
+        fps: 10, 
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0
+    };
+
+    // MAGIA: facingMode: "environment" obliga al celular a usar la cámara trasera
+    html5QrCode.start({ facingMode: "environment" }, configuracion, onScanSuccess, onScanFailure)
+    .catch((err) => {
+        console.warn("No se pudo iniciar la cámara trasera, intentando con la frontal...", err);
+        // Fallback: Por si lo abres en tu PC y solo tienes la webcam normal
+        html5QrCode.start({ facingMode: "user" }, configuracion, onScanSuccess, onScanFailure);
+    });
+</script>
+{% endblock %}

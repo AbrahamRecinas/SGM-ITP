@@ -21,4 +21,7 @@ urlpatterns = [
     path('equipos/nuevo/', views.nuevo_equipo, name='nuevo_equipo'),
     path('equipos/<int:equipo_id>/editar/', views.editar_equipo, name='editar_equipo'),
     path('', views.dashboard, name='dashboard'),
+    path('equipos/etiquetas/', views.imprimir_etiquetas, name='imprimir_etiquetas'),
+    path('escaner/', views.abrir_escaner, name='abrir_escaner'),
+    path('procesar-qr/', views.procesar_qr, name='procesar_qr'),
 ]
